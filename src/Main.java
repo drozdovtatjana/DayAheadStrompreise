@@ -10,6 +10,7 @@ import java.time.*;
 import java.util.*;
 import java.util.List;
 
+
 public class Main {
 
     public static void main(String[] args) {
@@ -49,11 +50,32 @@ public class Main {
                 return;
             }
 
-            // Use the existing austriaZone
             LocalDate date = selectedDate.toInstant().atZone(austriaZone).toLocalDate();
 
             new Thread(() -> {
                 try {
+
+                    // ===========================
+                    // Temporary Test Block for missing hours
+                    // ===========================
+
+
+//                    List<APIData> testData = generateTestDataWithGaps(date, austriaZone);
+//                    Map<ZonedDateTime, Double> normalizedData = DataUtils.normalizeData(testData, date, austriaZone);
+//                    SwingUtilities.invokeLater(() -> plotChart.plotChart(normalizedData));
+//
+//
+//
+//                    for (var entry : normalizedData.entrySet()) {
+//                        System.out.println(entry.getKey() + " -> " + entry.getValue());
+//                    }
+
+                    // ===========================
+                    // End of test block
+                    // ===========================
+
+
+
                     long[] timestamps = timeConverter(date);
                     APIfunction api = new APIfunction();
                     String jsonResponse = api.FETCING(timestamps[0], timestamps[1]);
@@ -74,6 +96,7 @@ public class Main {
 
                     SwingUtilities.invokeLater(() -> plotChart.plotChart(normalizedData));
 
+
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     SwingUtilities.invokeLater(() ->
@@ -83,10 +106,10 @@ public class Main {
             }).start();
         });
 
-        exitButton.addActionListener(e -> {
-            frame.dispose();
-        });
+        exitButton.addActionListener(e -> frame.dispose());
     }
+
+
 
     public static long[] timeConverter(LocalDate date) {
         LocalDate previousDay = date.minusDays(1);
@@ -121,6 +144,38 @@ public class Main {
         APIresponse response = new APIresponse();
         response.setData(list);
         return response;
+    }
+    // ===========================
+    // Methods for testing
+    // ===========================
+    public static List<APIData> generateTestDataWithGaps(LocalDate selectedDate, ZoneId zone) {
+        List<APIData> list = new ArrayList<>();
+
+        for (int dayOffset = -1; dayOffset <= 1; dayOffset++) {
+            LocalDate currentDate = selectedDate.plusDays(dayOffset);
+
+            for (int hour = 0; hour < 24; hour++) {
+
+                if (dayOffset == -1 && (hour == 3 || hour == 15)) {
+                    continue;
+                }
+
+                ZonedDateTime start = currentDate.atTime(hour, 0).atZone(zone);
+                ZonedDateTime end = start.plusHours(1);
+
+                APIData data = new APIData();
+                data.setStart_timestamp(Date.from(start.toInstant()));
+                data.setEnd_timestamp(Date.from(end.toInstant()));
+
+                double price = 10.0 + hour * 0.1 + dayOffset; // немного различаем дни
+                data.setMarketprice(price);
+                data.setUnit("ct/kWh");
+
+                list.add(data);
+            }
+        }
+
+        return list;
     }
 
     // Formatter for JDatePicker

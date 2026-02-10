@@ -1,5 +1,6 @@
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.markers.SeriesMarkers;
+
 import javax.swing.JFrame;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -45,10 +46,9 @@ public class plotChart {
 
             List<SeriesSegment> segments = splitByGaps(hours, prices);
 
-            boolean legendShown = false;
+            Color dayColor = Color.decode(colors[colorIndex % colors.length]);
 
             if (segments.isEmpty()) {
-                // Нет данных для дня — создаём фиктивную точку в полдень
                 Calendar cal = Calendar.getInstance();
                 cal.set(day.getYear(), day.getMonthValue() - 1, day.getDayOfMonth(), 12, 0);
                 Date noon = cal.getTime();
@@ -56,25 +56,26 @@ public class plotChart {
                 XYSeries s = chart.addSeries(day.toString() + " (No data)",
                         Collections.singletonList(noon),
                         Collections.singletonList(0.0));
-
                 s.setMarker(SeriesMarkers.CIRCLE);
                 s.setMarkerColor(Color.GRAY);
                 s.setLineColor(Color.GRAY);
             } else {
-                for (SeriesSegment seg : segments) {
-                    XYSeries s = chart.addSeries(
-                            legendShown ? day.toString() + "_gap" : day.toString(),
-                            seg.x,
-                            seg.y
-                    );
+                boolean showLegend = true;
 
+                for (int i = 0; i < segments.size(); i++) {
+                    SeriesSegment seg = segments.get(i);
+
+                    String seriesName = day.toString();
+                    if (i > 0) seriesName += "_gap" + i;
+
+                    XYSeries s = chart.addSeries(seriesName, seg.x, seg.y);
+
+                    s.setLineColor(dayColor);
+                    s.setMarkerColor(dayColor);
                     s.setMarker(SeriesMarkers.CIRCLE);
-                    s.setLineColor(java.awt.Color.decode(colors[colorIndex % colors.length]));
 
-                    if (legendShown) {
-                        s.setShowInLegend(false);
-                    }
-                    legendShown = true;
+                    s.setShowInLegend(showLegend);
+                    showLegend = false;
                 }
             }
 
@@ -82,7 +83,6 @@ public class plotChart {
         }
 
 
-        // ---- Create a JFrame manually with XChartPanel ----
         JFrame chartFrame = new JFrame("Day-Ahead Electricity Prices");
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         chartFrame.add(new XChartPanel<>(chart), BorderLayout.CENTER);
