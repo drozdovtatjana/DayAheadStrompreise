@@ -1,3 +1,38 @@
+EN
+
+To Run the Programm: 
+
+Programming flow: Console app first ...
+Programming Language:
+
+Architectural Style:
+
+Design Patterns: 
+
+OOP usage:
+
+Robust Data: try-catch
+
+Data Normalization:
+
+Libraries:
+
+Why not Docker:
+
+Winter/Summer Time explanation:
+
+Testing:
+
+Missing data on some hours:
+
+Code Structure Diagramm:
+
+
+
+
+DE
+
+
 Die Normalisierung erfolgt anhand eines expliziten Stundenrasters
 auf Basis der Benutzer-ausgewählten Kalenderdaten
 (Vortag, Stichtag, Folgetag).
