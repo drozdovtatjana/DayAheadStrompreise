@@ -1,15 +1,28 @@
 package domain;
 
-
 import java.time.ZonedDateTime;
 
-/**
- * Domain model representing one hourly electricity price.
- * Independent from API, JSON, and UI layers.
- */
-public record PricePoint(
-        ZonedDateTime start,
-        ZonedDateTime end,
-        double priceCtPerKwh
-) {
+public class PricePoint {
+
+    private final ZonedDateTime start;
+    private final ZonedDateTime end;
+    private final double priceCtPerKwh;
+
+    public PricePoint(ZonedDateTime start, ZonedDateTime end, double priceCtPerKwh) {
+        this.start = start;
+        this.end = end;
+        this.priceCtPerKwh = priceCtPerKwh;
+    }
+
+    public ZonedDateTime getStart() {
+        return start;
+    }
+
+    public ZonedDateTime getEnd() {
+        return end;
+    }
+
+    public double getPriceCtPerKwh() {
+        return priceCtPerKwh;
+    }
 }

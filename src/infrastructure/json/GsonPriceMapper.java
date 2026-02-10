@@ -9,14 +9,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Maps API DTOs to domain models.
- */
+
 public class GsonPriceMapper {
 
-    /**
-     * Converts raw API DTOs into domain PricePoint objects.
-     */
+
     public List<PricePoint> toDomain(
             List<AwattarPriceDto> dtoList,
             ZoneId targetZone

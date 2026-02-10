@@ -9,17 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Normalizes electricity prices into a complete hourly time grid.
- */
+
 public class PriceNormalizer {
 
-    /**
-     * Builds a normalized hourly price map for
-     * previous day, selected day, and next day.
-     *
-     * Missing hours are represented as NaN.
-     */
     public Map<ZonedDateTime, Double> normalize(
             List<PricePoint> prices,
             LocalDate selectedDate,
@@ -39,13 +31,13 @@ public class PriceNormalizer {
 
         // Fill known prices
         for (PricePoint p : prices) {
-            ZonedDateTime hour = p.start()
+            ZonedDateTime hour = p.getStart()
                     .withMinute(0)
                     .withSecond(0)
                     .withNano(0);
 
             if (normalized.containsKey(hour)) {
-                normalized.put(hour, p.priceCtPerKwh());
+                normalized.put(hour, p.getPriceCtPerKwh());
             }
         }
 

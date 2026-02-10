@@ -13,13 +13,9 @@ import java.util.List;
 
 public class ChartController {
 
-    // Keep track of open chart frames
     private static final List<JFrame> chartFrames = new ArrayList<>();
 
-    /**
-     * Plots a chart of hourly prices, handling missing data gaps.
-     * @param hourlyPrices Map of hour -> price
-     */
+
     public static void plotChart(Map<ZonedDateTime, Double> hourlyPrices) {
 
         XYChart chart = new XYChartBuilder()
@@ -90,7 +86,6 @@ public class ChartController {
             colorIndex++;
         }
 
-        // Create chart JFrame
         JFrame chartFrame = new JFrame("Day-Ahead Electricity Prices");
         chartFrames.add(chartFrame); // track frame
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -100,7 +95,6 @@ public class ChartController {
         chartFrame.setVisible(true);
     }
 
-    // Call this from DatePickerFrame exit button
     public static void closeAllCharts() {
         for (JFrame frame : chartFrames) {
             frame.dispose();
@@ -133,7 +127,6 @@ public class ChartController {
         return segments;
     }
 
-    // Helper class for split segments
     private static class SeriesSegment {
         List<Date> x;
         List<Double> y;

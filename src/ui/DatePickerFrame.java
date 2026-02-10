@@ -23,7 +23,6 @@ public class DatePickerFrame extends JFrame {
     public DatePickerFrame() {
         super("Select a Date");
 
-        // Initialize service
         this.priceService = new PriceService(
                 new AwattarClient(),
                 new GsonPriceMapper(),
@@ -38,7 +37,6 @@ public class DatePickerFrame extends JFrame {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLayout(new FlowLayout());
 
-        // JDatePicker setup
         UtilDateModel model = new UtilDateModel();
         Properties p = new Properties();
         p.put("text.today", "Today");
@@ -56,7 +54,6 @@ public class DatePickerFrame extends JFrame {
         this.setLocationRelativeTo(null);
         this.setVisible(true);
 
-        // Action listeners
         okButton.addActionListener(e -> onDateSelected(datePicker));
         exitButton.addActionListener(e -> {
             ChartController.closeAllCharts();
@@ -77,7 +74,6 @@ public class DatePickerFrame extends JFrame {
                 Map<ZonedDateTime, Double> normalizedData =
                         priceService.loadNormalizedPrices(date, austriaZone);
                 System.out.println(export.JsonExporter.toNormalizedJsonString(normalizedData));
-                // Delegate chart rendering
                 SwingUtilities.invokeLater(() ->
                         ChartController.plotChart(normalizedData)
                 );
@@ -91,7 +87,6 @@ public class DatePickerFrame extends JFrame {
         }).start();
     }
 
-    // Formatter for JDatePicker
     public static class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
         private final java.text.SimpleDateFormat dateFormatter =
                 new java.text.SimpleDateFormat("yyyy-MM-dd");

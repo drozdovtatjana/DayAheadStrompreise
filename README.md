@@ -8,7 +8,7 @@ saving time transitions.
 ## How to Run the Program
 
 1. Ensure **Java 11 or newer** is installed.
-2. Run the project via IDE or command line.
+2. Run the project via IDE or command line from Main.java, Main.java is located in src/ui Repository
 3. The application starts with a **date picker UI**.
 4. After selecting a date:
 

@@ -9,17 +9,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
-/**
- * Exports normalized hourly prices to JSON.
- */
 public class JsonExporter {
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmXXX");
 
-    /**
-     * Converts normalized price map into JSON object.
-     */
+
     public static JsonObject toNormalizedJson(Map<ZonedDateTime, Double> normalized) {
         JsonObject root = new JsonObject();
         root.addProperty("timezone", "Europe/Vienna");
@@ -49,9 +44,7 @@ public class JsonExporter {
         return root;
     }
 
-    /**
-     * Returns JSON as pretty-printed string.
-     */
+
     public static String toNormalizedJsonString(Map<ZonedDateTime, Double> normalized) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(toNormalizedJson(normalized));

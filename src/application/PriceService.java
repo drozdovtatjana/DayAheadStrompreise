@@ -13,10 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.ZonedDateTime;
 
-/**
- * Service layer responsible for orchestrating
- * data retrieval, mapping, and normalization.
- */
+
 public class PriceService {
 
     private final AwattarClient apiClient;
@@ -33,13 +30,7 @@ public class PriceService {
         this.normalizer = normalizer;
     }
 
-    /**
-     * Loads normalized hourly prices for a given date.
-     *
-     * @param date target date
-     * @param zone time zone
-     * @return map of hourly prices
-     */
+
     public Map<ZonedDateTime, Double> loadNormalizedPrices(
             LocalDate date,
             ZoneId zone

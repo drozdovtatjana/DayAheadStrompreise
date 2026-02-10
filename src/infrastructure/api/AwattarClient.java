@@ -9,9 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-/**
- * Client responsible for communicating with the aWATTar API.
- */
+
 public class AwattarClient {
 
     private static final String BASE_URL =
@@ -25,14 +23,6 @@ public class AwattarClient {
         this.gson = new Gson();
     }
 
-    /**
-     * Fetches raw price data from the aWATTar API.
-     *
-     * @param start Unix timestamp in milliseconds
-     * @param end   Unix timestamp in milliseconds
-     * @param locale API locale (e.g. "at")
-     * @return list of price DTOs
-     */
     public List<AwattarPriceDto> fetchPrices(
             long start,
             long end,
