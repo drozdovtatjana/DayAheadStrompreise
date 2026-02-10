@@ -27,6 +27,9 @@ Missing data on some hours:
 
 Code Structure Diagramm:
 
+Bugs to Fix:
+
+Possible Improments:
 
 
 

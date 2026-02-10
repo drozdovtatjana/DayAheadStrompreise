@@ -35,11 +35,11 @@ public class DataUtils {
 
             // 3 Fill available API data
             for (APIData d : apiData) {
-                ZonedDateTime hour =
-                        ZonedDateTime.ofInstant(
-                                d.getStart_timestamp().toInstant(),
-                                zone
-                        ).withMinute(0).withSecond(0).withNano(0);
+                ZonedDateTime hour = ZonedDateTime.ofInstant(
+                        d.getStart_timestamp().toInstant(),
+                        d.getStart_timestamp().toInstant().atZone(ZoneId.systemDefault()).getZone()
+                ).withZoneSameInstant(zone).withMinute(0).withSecond(0).withNano(0);                              // dann zu Vienna
+
 
                 // EUR/MWh → ct/kWh
                 double priceCtKwh = d.getMarketprice() / 10.0;

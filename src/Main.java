@@ -75,7 +75,6 @@ public class Main {
                     // ===========================
 
 
-
                     long[] timestamps = timeConverter(date);
                     APIfunction api = new APIfunction();
                     String jsonResponse = api.FETCING(timestamps[0], timestamps[1]);
@@ -88,11 +87,14 @@ public class Main {
                     }
 
                     APIresponse response = JSONtoData(jsonResponse);
+
                     Map<ZonedDateTime, Double> normalizedData = DataUtils.normalizeData(
                             response.getData(),
                             date,
                             austriaZone
                     );
+
+                    System.out.println(JSONExporter.toNormalizedJsonString(normalizedData));
 
                     SwingUtilities.invokeLater(() -> plotChart.plotChart(normalizedData));
 
@@ -108,7 +110,6 @@ public class Main {
 
         exitButton.addActionListener(e -> frame.dispose());
     }
-
 
 
     public static long[] timeConverter(LocalDate date) {
@@ -145,6 +146,7 @@ public class Main {
         response.setData(list);
         return response;
     }
+
     // ===========================
     // Methods for testing
     // ===========================

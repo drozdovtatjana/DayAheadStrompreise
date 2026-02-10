@@ -3,6 +3,7 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import javax.swing.JFrame;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.awt.*;
@@ -25,11 +26,15 @@ public class plotChart {
         Map<LocalDate, List<Double>> pricesPerDay = new LinkedHashMap<>();
         Map<LocalDate, List<Date>> hoursPerDay = new LinkedHashMap<>();
 
+        ZoneId zone = ZoneId.of("Europe/Vienna");
+
         for (Map.Entry<ZonedDateTime, Double> entry : hourlyPrices.entrySet()) {
             LocalDate day = entry.getKey().toLocalDate();
             pricesPerDay.computeIfAbsent(day, k -> new ArrayList<>()).add(entry.getValue());
             hoursPerDay.computeIfAbsent(day, k -> new ArrayList<>())
-                    .add(Date.from(entry.getKey().toInstant()));
+                    .add(Date.from(entry.getKey()
+                            .withZoneSameInstant(zone)
+                            .toInstant()));
         }
 
         List<LocalDate> allDays = new ArrayList<>(pricesPerDay.keySet());
