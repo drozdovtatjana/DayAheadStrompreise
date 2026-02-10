@@ -1,0 +1,15 @@
+Die Normalisierung erfolgt anhand eines expliziten Stundenrasters
+auf Basis der Benutzer-ausgewählten Kalenderdaten
+(Vortag, Stichtag, Folgetag).
+
+Durch die Verwendung von ZonedDateTime mit der Zeitzone
+Europe/Vienna werden Tage mit 23 bzw. 25 Stunden
+(Sommer-/Winterzeit) korrekt abgebildet.
+
+Fehlende Marktpreise werden explizit als NaN modelliert.
+
+
+Fehlende Stunden (NaN) werden im Chart nicht verbunden.
+Die Zeitreihe wird in zusammenhängende Segmente unterteilt,
+wodurch Datenlücken (z. B. durch Sommerzeitumstellung)
+visuell als echte Gaps dargestellt werden.

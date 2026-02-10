@@ -1,36 +1,56 @@
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
 public class DataUtils {
 
-    public static Map<ZonedDateTime, Double> normalizeData(List<APIData> data, ZoneId zone) {
-        Map<ZonedDateTime, Double> hourlyPrices = new LinkedHashMap<>();
 
-        if (data.isEmpty()) return hourlyPrices;
+        /**
+         * Normalizes aWATTar market data into a complete hourly grid
+         * for the previous day, selected day and next day.
+         *
+         * Missing hours are explicitly represented as NaN.
+         * Time zone: Europe/Vienna (DST-aware).
+         */
+        public static Map<ZonedDateTime, Double> normalizeData(
+                List<APIData> apiData,
+                LocalDate selectedDate,
+                ZoneId zone
+        ) {
+            Map<ZonedDateTime, Double> normalized = new LinkedHashMap<>();
 
-        // Determine range: min start to max end
-        Date minDate = data.stream().map(APIData::getStart_timestamp).min(Date::compareTo).get();
-        Date maxDate = data.stream().map(APIData::getEnd_timestamp).max(Date::compareTo).get();
+            // 1Define fixed calendar range (not data-driven!)
+            ZonedDateTime start =
+                    selectedDate.minusDays(1).atStartOfDay(zone);
+            ZonedDateTime end =
+                    selectedDate.plusDays(2).atStartOfDay(zone);
 
-        ZonedDateTime start = ZonedDateTime.ofInstant(minDate.toInstant(), zone)
-                .withMinute(0).withSecond(0).withNano(0);
-        ZonedDateTime end = ZonedDateTime.ofInstant(maxDate.toInstant(), zone)
-                .withMinute(0).withSecond(0).withNano(0);
+            //  Build full hourly raster (DST-safe)
+            ZonedDateTime cursor = start;
+            while (cursor.isBefore(end)) {
+                normalized.put(cursor, Double.NaN);
+                cursor = cursor.plusHours(1);
+            }
 
-        // Create hourly slots and initialize with NaN
-        ZonedDateTime current = start;
-        while (!current.isAfter(end)) {
-            hourlyPrices.put(current, Double.NaN);
-            current = current.plusHours(1);
+            // 3 Fill available API data
+            for (APIData d : apiData) {
+                ZonedDateTime hour =
+                        ZonedDateTime.ofInstant(
+                                d.getStart_timestamp().toInstant(),
+                                zone
+                        ).withMinute(0).withSecond(0).withNano(0);
+
+                // EUR/MWh → ct/kWh
+                double priceCtKwh = d.getMarketprice() / 10.0;
+
+                if (normalized.containsKey(hour)) {
+                    normalized.put(hour, priceCtKwh);
+                }
+            }
+
+            return normalized;
         }
-
-        // Fill available data
-        for (APIData d : data) {
-            ZonedDateTime ts = ZonedDateTime.ofInstant(d.getStart_timestamp().toInstant(), zone);
-            hourlyPrices.put(ts, d.getMarketprice());
-        }
-
-        return hourlyPrices;
     }
-}
+
+

@@ -48,16 +48,38 @@ public class Main {
                 JOptionPane.showMessageDialog(frame, "Please select a date!");
                 return;
             }
+
+            // Use the existing austriaZone
             LocalDate date = selectedDate.toInstant().atZone(austriaZone).toLocalDate();
 
-            // Fetch and plot data in a separate thread
             new Thread(() -> {
-                long[] dates = timeConverter(date);
-                APIfunction api = new APIfunction();
-                String jsonResponse = api.FETCING(dates[0], dates[1]);
-                APIresponse response = JSONtoData(jsonResponse);
-                Map<ZonedDateTime, Double> normalizedData = DataUtils.normalizeData(response.getData(), austriaZone);
-                plotChart.plotChart(normalizedData);
+                try {
+                    long[] timestamps = timeConverter(date);
+                    APIfunction api = new APIfunction();
+                    String jsonResponse = api.FETCING(timestamps[0], timestamps[1]);
+
+                    if (jsonResponse == null) {
+                        SwingUtilities.invokeLater(() ->
+                                JOptionPane.showMessageDialog(frame, "Failed to fetch data from API")
+                        );
+                        return;
+                    }
+
+                    APIresponse response = JSONtoData(jsonResponse);
+                    Map<ZonedDateTime, Double> normalizedData = DataUtils.normalizeData(
+                            response.getData(),
+                            date,
+                            austriaZone
+                    );
+
+                    SwingUtilities.invokeLater(() -> plotChart.plotChart(normalizedData));
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    SwingUtilities.invokeLater(() ->
+                            JOptionPane.showMessageDialog(frame, "Error processing data: " + ex.getMessage())
+                    );
+                }
             }).start();
         });
 

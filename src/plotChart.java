@@ -1,10 +1,11 @@
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.markers.SeriesMarkers;
-
 import javax.swing.JFrame;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.awt.*;
+import java.util.List;
 
 public class plotChart {
 
@@ -20,61 +21,109 @@ public class plotChart {
         chart.getStyler().setDatePattern("HH:mm");
         chart.getStyler().setLegendVisible(true);
 
-        // Separate by day
         Map<LocalDate, List<Double>> pricesPerDay = new LinkedHashMap<>();
         Map<LocalDate, List<Date>> hoursPerDay = new LinkedHashMap<>();
 
         for (Map.Entry<ZonedDateTime, Double> entry : hourlyPrices.entrySet()) {
             LocalDate day = entry.getKey().toLocalDate();
             pricesPerDay.computeIfAbsent(day, k -> new ArrayList<>()).add(entry.getValue());
-            hoursPerDay.computeIfAbsent(day, k -> new ArrayList<>()).add(Date.from(entry.getKey().toInstant()));
+            hoursPerDay.computeIfAbsent(day, k -> new ArrayList<>())
+                    .add(Date.from(entry.getKey().toInstant()));
         }
 
-        // Ensure exactly 3 days
         List<LocalDate> allDays = new ArrayList<>(pricesPerDay.keySet());
-        LocalDate lastDay = allDays.isEmpty() ? LocalDate.now() : allDays.get(allDays.size() - 1);
-        while (allDays.size() < 3) {
-            lastDay = lastDay.plusDays(1);
-            allDays.add(lastDay);
-        }
         if (allDays.size() > 3) {
             allDays = allDays.subList(0, 3);
         }
 
-        int colorIndex = 0;
         String[] colors = {"#FF0000", "#00AA00", "#0000FF"};
+        int colorIndex = 0;
 
         for (LocalDate day : allDays) {
-            List<Date> hours = hoursPerDay.getOrDefault(day, new ArrayList<>());
-            List<Double> prices = pricesPerDay.getOrDefault(day, new ArrayList<>());
+            List<Date> hours = hoursPerDay.getOrDefault(day, List.of());
+            List<Double> prices = pricesPerDay.getOrDefault(day, List.of());
 
-            XYSeries series;
+            List<SeriesSegment> segments = splitByGaps(hours, prices);
 
-            if (!prices.isEmpty()) {
-                // Normal data
-                series = chart.addSeries(day.toString(), hours, prices);
-                series.setMarker(SeriesMarkers.CIRCLE);           // ← точки на линии
-                 series.setLineColor(java.awt.Color.decode(colors[colorIndex % colors.length]));
+            boolean legendShown = false;
 
-            } else {
-                // No data: create a dummy point at noon
+            if (segments.isEmpty()) {
+                // Нет данных для дня — создаём фиктивную точку в полдень
                 Calendar cal = Calendar.getInstance();
-                cal.set(day.getYear(), day.getMonthValue() - 1, day.getDayOfMonth(), 12, 0); // noon
+                cal.set(day.getYear(), day.getMonthValue() - 1, day.getDayOfMonth(), 12, 0);
                 Date noon = cal.getTime();
 
-                series = chart.addSeries(day.toString() + " (No data)",
+                XYSeries s = chart.addSeries(day.toString() + " (No data)",
                         Collections.singletonList(noon),
                         Collections.singletonList(0.0));
-                series.setMarker(SeriesMarkers.CIRCLE); // show a single gray dot
-                series.setMarkerColor(java.awt.Color.GRAY);
-                // No need to disable lines — single point means no line
+
+                s.setMarker(SeriesMarkers.CIRCLE);
+                s.setMarkerColor(Color.GRAY);
+                s.setLineColor(Color.GRAY);
+            } else {
+                for (SeriesSegment seg : segments) {
+                    XYSeries s = chart.addSeries(
+                            legendShown ? day.toString() + "_gap" : day.toString(),
+                            seg.x,
+                            seg.y
+                    );
+
+                    s.setMarker(SeriesMarkers.CIRCLE);
+                    s.setLineColor(java.awt.Color.decode(colors[colorIndex % colors.length]));
+
+                    if (legendShown) {
+                        s.setShowInLegend(false);
+                    }
+                    legendShown = true;
+                }
             }
 
             colorIndex++;
         }
 
-        SwingWrapper<XYChart> sw = new SwingWrapper<>(chart);
-        JFrame chartFrame = sw.displayChart();
+
+        // ---- Create a JFrame manually with XChartPanel ----
+        JFrame chartFrame = new JFrame("Day-Ahead Electricity Prices");
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        chartFrame.add(new XChartPanel<>(chart), BorderLayout.CENTER);
+        chartFrame.pack();
+        chartFrame.setLocationRelativeTo(null);
+        chartFrame.setVisible(true);
+    }
+
+    // ---------- GAP SPLITTER ----------
+    private static List<SeriesSegment> splitByGaps(List<Date> x, List<Double> y) {
+        List<SeriesSegment> segments = new ArrayList<>();
+        List<Date> segX = new ArrayList<>();
+        List<Double> segY = new ArrayList<>();
+
+        for (int i = 0; i < y.size(); i++) {
+            Double val = y.get(i);
+
+            if (val != null && !val.isNaN()) {
+                segX.add(x.get(i));
+                segY.add(val);
+            } else if (!segX.isEmpty()) {
+                segments.add(new SeriesSegment(segX, segY));
+                segX = new ArrayList<>();
+                segY = new ArrayList<>();
+            }
+        }
+
+        if (!segX.isEmpty()) {
+            segments.add(new SeriesSegment(segX, segY));
+        }
+
+        return segments;
+    }
+
+    static class SeriesSegment {
+        List<Date> x;
+        List<Double> y;
+
+        SeriesSegment(List<Date> x, List<Double> y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 }
