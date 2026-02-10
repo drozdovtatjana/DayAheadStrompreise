@@ -37,14 +37,11 @@ public class PriceService {
     ) {
         long[] timestamps = TimeRangeFactory.forThreeDays(date, zone);
 
-        // 1. Fetch API DTOs
         List<AwattarPriceDto> dtoList =
                 apiClient.fetchPrices(timestamps[0], timestamps[1], "at");
 
-        // 2. Map to domain
         List<PricePoint> prices = mapper.toDomain(dtoList, zone);
 
-        // 3. Normalize
         return normalizer.normalize(prices, date, zone);
     }
 }

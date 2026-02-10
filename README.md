@@ -84,7 +84,7 @@ Java was chosen for:
 * Cross-platform compatibility
 * Maintainability and scalability
 
-Python was considered, but Java provides stronger structure and long-term reliability for this task.
+Python was considered, but Java provides stronger structure and faster.
 
 ---
 
@@ -130,7 +130,6 @@ This architecture supports extensibility and clean separation between technical 
 
 * Single Responsibility Principle applied across classes
 * Constructor-based dependency injection
-* Immutable domain model (`PricePoint` implemented as a `record`)
 * Extensible design suitable for future interfaces or exporters
 
 ---
@@ -138,7 +137,6 @@ This architecture supports extensibility and clean separation between technical 
 ## Robust Data Handling
 
 * API responses are validated (non-200 responses fail explicitly)
-* Errors are propagated to the UI
 * Missing hours are explicitly represented using `NaN`
 * Prices are consistently converted from `EUR/MWh` to `ct/kWh`
 
