@@ -1,17 +1,27 @@
+package ui;
+
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
-import javax.swing.JFrame;
+import javax.swing.*;
+import java.awt.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.awt.*;
 import java.util.List;
 
-public class plotChart {
+public class ChartController {
 
+    // Keep track of open chart frames
+    private static final List<JFrame> chartFrames = new ArrayList<>();
+
+    /**
+     * Plots a chart of hourly prices, handling missing data gaps.
+     * @param hourlyPrices Map of hour -> price
+     */
     public static void plotChart(Map<ZonedDateTime, Double> hourlyPrices) {
+
         XYChart chart = new XYChartBuilder()
                 .width(1000)
                 .height(600)
@@ -32,15 +42,11 @@ public class plotChart {
             LocalDate day = entry.getKey().toLocalDate();
             pricesPerDay.computeIfAbsent(day, k -> new ArrayList<>()).add(entry.getValue());
             hoursPerDay.computeIfAbsent(day, k -> new ArrayList<>())
-                    .add(Date.from(entry.getKey()
-                            .withZoneSameInstant(zone)
-                            .toInstant()));
+                    .add(Date.from(entry.getKey().withZoneSameInstant(zone).toInstant()));
         }
 
         List<LocalDate> allDays = new ArrayList<>(pricesPerDay.keySet());
-        if (allDays.size() > 3) {
-            allDays = allDays.subList(0, 3);
-        }
+        if (allDays.size() > 3) allDays = allDays.subList(0, 3);
 
         String[] colors = {"#FF0000", "#00AA00", "#0000FF"};
         int colorIndex = 0;
@@ -66,7 +72,6 @@ public class plotChart {
                 s.setLineColor(Color.GRAY);
             } else {
                 boolean showLegend = true;
-
                 for (int i = 0; i < segments.size(); i++) {
                     SeriesSegment seg = segments.get(i);
 
@@ -78,22 +83,29 @@ public class plotChart {
                     s.setLineColor(dayColor);
                     s.setMarkerColor(dayColor);
                     s.setMarker(SeriesMarkers.CIRCLE);
-
                     s.setShowInLegend(showLegend);
                     showLegend = false;
                 }
             }
-
             colorIndex++;
         }
 
-
+        // Create chart JFrame
         JFrame chartFrame = new JFrame("Day-Ahead Electricity Prices");
+        chartFrames.add(chartFrame); // track frame
         chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        chartFrame.add(new XChartPanel<>(chart), BorderLayout.CENTER);
+        chartFrame.add(new XChartPanel<>(chart));
         chartFrame.pack();
         chartFrame.setLocationRelativeTo(null);
         chartFrame.setVisible(true);
+    }
+
+    // Call this from DatePickerFrame exit button
+    public static void closeAllCharts() {
+        for (JFrame frame : chartFrames) {
+            frame.dispose();
+        }
+        chartFrames.clear();
     }
 
     // ---------- GAP SPLITTER ----------
@@ -104,7 +116,6 @@ public class plotChart {
 
         for (int i = 0; i < y.size(); i++) {
             Double val = y.get(i);
-
             if (val != null && !val.isNaN()) {
                 segX.add(x.get(i));
                 segY.add(val);
@@ -122,7 +133,8 @@ public class plotChart {
         return segments;
     }
 
-    static class SeriesSegment {
+    // Helper class for split segments
+    private static class SeriesSegment {
         List<Date> x;
         List<Double> y;
 
