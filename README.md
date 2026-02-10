@@ -156,7 +156,7 @@ Normalization is implemented in `PriceNormalizer`:
 * Available prices overwrite the corresponding hour slot
 
 This guarantees:
-
+ 
 * Explicit representation of gaps
 * Chronological ordering
 * Consistent output for visualization and export
